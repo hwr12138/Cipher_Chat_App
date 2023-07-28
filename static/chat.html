@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link rel="stylesheet" type="text/css" href="chat.css" />
+</head>
+
+<body>
+    <div class="main">
+        <h3>Nickname: <input type="text" id="user" /></h3>
+        <input type="text" value="说：" id="say" hidden />
+        <h3>Message: </h3><input type="text" id="txt" class="txt" /><br>
+        <input type="button" id="btn" class="btn" value="send" onclick="sendMsg();" />
+        <input type="reset" id="reset" class="reset" value="reset" onclick=location="websocket.html">
+        <input type="button" id="close" class="close" value="disconnect" onclick="closeConn();" />
+    </div>
+    <div id="content" class="content"></div>
+</body>
+
+</html>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+    var query = new Array();
+    window.onload = function() {
+        if (query.length == 0) {
+            if (window.location.search.split('?').length > 1) {
+                var params = window.location.search.split('?')[1].split('&');
+                for (var i = 0; i < params.length; i++) {
+                    var key = params[i].split('=')[0];
+                    var value = params[i].split('=')[1];
+                    query[key] = value;
+                }
+            }
+        }
+    };
+    console.log(query);
+    var socket = new WebSocket("ws://127.0.0.1:8088");
+    socket.onopen = function() {
+        var newTag = document.createElement('div');
+        newTag.innerHTML = "Connection Established";
+        document.getElementById('content').appendChild(newTag);
+        while (query['user'] == null) {
+            var i = 1
+        }
+        socket.send(process(JSON.stringify({
+            _id: query['user'],
+            //sessionId: query['sessionId']
+        })));
+    };
+    socket.onmessage = function(event) {
+        var response = event.data;
+        var newTag = document.createElement('div');
+        newTag.innerHTML = response;
+        document.getElementById('content').appendChild(newTag);
+    };
+    socket.onclose = function(event) {
+        var newTag = document.createElement('div');
+        newTag.innerHTML = "Connection Failed";
+        document.getElementById('content').appendChild(newTag);
+    };
+
+    function sendMsg() {
+        var user = document.getElementById('user');
+        var say = document.getElementById('say');
+        var txt = document.getElementById('txt');
+        if (txt.value == "") {
+            alert("message cannot be blank");
+            return;
+        }
+        var msg = {
+            sessionId: query['sessionId'],
+            user: user.value,
+            message: txt.value
+        }
+        socket.send(process(JSON.stringify(msg)));
+        txt.value = "";
+    }
+
+    function process(msg) {
+        result = "";
+        for (var i = 0; i < msg.length; i++) {
+            result = result + String.fromCharCode(msg.charCodeAt(i) + 5);
+        }
+        return result;
+    }
+
+    function closeConn() {
+        var msg = {
+            sessionId: query['sessionId'],
+            user: query['user'],
+            message: "__closeConn__"
+        }
+        socket.send(process(JSON.stringify(msg)));
+        //socket.close();
+        var newTag = document.createElement('div');
+        newTag.innerHTML = "Closing connection";
+        document.getElementById('content').appendChild(newTag);
+    }
+</script>

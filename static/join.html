@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Join</title>
+    <link rel="stylesheet" type="text/css" href="join.css" />
+</head>
+<div id="join">
+    <input type="text" id="sessionId" placeholder="sessionId"></input>
+    <button type="button" class="but" onclick="join()">Join in</button>
+    <button type="button" class="but" onclick="join_global()">Join Global Chat</button>
+</div>
+
+</html>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var query = new Array();
+    window.onload = function() {
+        if (query.length == 0) {
+            if (window.location.search.split('?').length > 1) {
+                var params = window.location.search.split('?')[1].split('&');
+                console.log(params.length)
+                for (var i = 0; i < params.length; i++) {
+                    var key = params[i].split('=')[0];
+                    var value = params[i].split('=')[1];
+                    query[key] = value;
+                }
+            }
+        }
+    };
+
+    function join() {
+        let httpurl = "http://127.0.0.1:8000/api/session/join/";
+        let sessionId = document.getElementById("sessionId");
+        if (sessionId == "" || sessionId == null) {
+            alert("sessionId is empty");
+            return;
+        }
+        axios.get(httpurl, {
+            params: {
+                user: query['user'],
+                sessionId: sessionId.value
+            }
+        }).then(function(response) {
+            if (response.status == 200) {
+                window.location.href = "chat.html?user=" + query['user'] + '&sessionId=' + sessionId.value;
+            } else {
+                var res = response.data;
+                console.log(res)
+                var newTag = document.createElement('div');
+                newTag.innerHTML = res;
+                document.getElementById('login').appendChild(newTag);
+            }
+        }).catch(function(err) {
+            console.log(err)
+            
+        });
+    };
+
+    function join_global() {
+        console.log(query['user'])
+        window.location.href = "chat.html?user=" + query['user'] + '&sessionId=global';
+        return false;
+    };
+</script>

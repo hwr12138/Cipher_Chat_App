@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="login.css" />
+</head>
+
+<body>
+    <div id="login">
+        <h1>Login</h1>
+        <div>
+            <input id="username" type="text" placeholder="username" name="u"></input>
+            <input id="password" type="password" placeholder="password" name="p"></input>
+            <button type="button" class="but" onclick="login()">Login</button>
+            <button type="button" class="but" onclick="register()">Register</button>
+        </div>
+
+    </div>
+</body>
+
+</html>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    function login() {
+        let httpurl = "http://127.0.0.1:8000/api/account/login/";
+        let username = document.getElementById("username");
+        let password = document.getElementById("password");
+        if (username == "" || username == null) {
+            alert("username is empty");
+            return;
+        }
+        if (password == "" || password == null) {
+            alert("password is empty");
+            return;
+        }
+        axios.get(httpurl, {
+            params: {
+                user: username.value,
+                pass: password.value
+            }
+        }).then(function(response) {
+            if (response.status == 200) {
+                console.log(response.data);
+                localStorage.setItem(response.data['_id'],username.value)
+                window.location.href = "join.html?user=" + response.data['_id']
+            }
+        }).catch(function(err) {
+            alert(err.response['data']['message'])
+        });
+    }
+
+    function register() {
+        let httpurl = "http://127.0.0.1:8000/api/account/register/";
+        let username = document.getElementById("username");
+        let password = document.getElementById("password");
+        if (username == "" || username == null) {
+            alert("username is empty");
+            return;
+        }
+        if (password == "" || password == null) {
+            alert("password is empty");
+            return;
+        }
+        response = axios.get(httpurl, {
+            params: {
+                user: username.value,
+                pass: password.value
+            }
+        }).then(response => {
+            if (response.status == 200) {
+                window.location.href = "join.html?user=" + response.data['_id']
+            }
+        }).catch(function(err) {
+            alert(err.response['data']['message'])
+        });
+    }
+</script>
