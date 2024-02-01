@@ -1,4 +1,6 @@
 # Python Websocket Chat App
+## About
+Capable of user registration, login, direct messaging, joining chat rooms, global chat, and keeping chat history. 
 ## To run it:
 1. Start MongoDB and connect to localhost:27017
 2. Run the command “python app.py” to start the server
